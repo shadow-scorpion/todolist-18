@@ -3,9 +3,11 @@ import type { RootState } from "@/app/store"
 import { clearDataAC } from "@/common/actions"
 import { ResultCode } from "@/common/enums"
 import { createAppSlice, handleServerAppError, handleServerNetworkError } from "@/common/utils"
-import { tasksApi } from "@/features/todolists/api/tasksApi"
+import { _tasksApi } from "@/features/todolists/api/tasksApi"
 import { type DomainTask, domainTaskSchema, type UpdateTaskModel } from "@/features/todolists/api/tasksApi.types"
 import { createTodolistTC, deleteTodolistTC } from "./todolists-slice"
+
+// Этот слайс не нужен нам в приложении так как мы переписали все на RTK Query
 
 export const tasksSlice = createAppSlice({
   name: "tasks",
@@ -30,7 +32,7 @@ export const tasksSlice = createAppSlice({
       async (todolistId: string, { dispatch, rejectWithValue }) => {
         try {
           dispatch(setAppStatusAC({ status: "loading" }))
-          const res = await tasksApi.getTasks(todolistId)
+          const res = await _tasksApi.getTasks(todolistId)
           const tasks = domainTaskSchema.array().parse(res.data.items)
           dispatch(setAppStatusAC({ status: "succeeded" }))
           return { todolistId, tasks }
@@ -49,7 +51,7 @@ export const tasksSlice = createAppSlice({
       async (payload: { todolistId: string; title: string }, { dispatch, rejectWithValue }) => {
         try {
           dispatch(setAppStatusAC({ status: "loading" }))
-          const res = await tasksApi.createTask(payload)
+          const res = await _tasksApi.createTask(payload)
           if (res.data.resultCode === ResultCode.Success) {
             dispatch(setAppStatusAC({ status: "succeeded" }))
             return { task: res.data.data.item }
@@ -72,7 +74,7 @@ export const tasksSlice = createAppSlice({
       async (payload: { todolistId: string; taskId: string }, { dispatch, rejectWithValue }) => {
         try {
           dispatch(setAppStatusAC({ status: "loading" }))
-          const res = await tasksApi.deleteTask(payload)
+          const res = await _tasksApi.deleteTask(payload)
           if (res.data.resultCode === ResultCode.Success) {
             dispatch(setAppStatusAC({ status: "succeeded" }))
             return payload
@@ -121,7 +123,7 @@ export const tasksSlice = createAppSlice({
 
         try {
           dispatch(setAppStatusAC({ status: "loading" }))
-          const res = await tasksApi.updateTask({ todolistId, taskId, model })
+          const res = await _tasksApi.updateTask({ todolistId, taskId, model })
           if (res.data.resultCode === ResultCode.Success) {
             dispatch(setAppStatusAC({ status: "succeeded" }))
             return { task: res.data.data.item }
